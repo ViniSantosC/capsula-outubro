@@ -1,0 +1,154 @@
+/*
+  CSS para adicionar ao final do seu styles.css original.
+  Não muda sua estrutura HTML nem seu script.js.
+  Mantém .bloco-album, .galeria-overlay, .fotos-grid e .foto-item.
+*/
+
+/* Cards da section Momentos: texto original + fotografia física */
+.momento-destaque {
+  gap: 0;
+  border: 1px solid rgba(99, 169, 255, .32);
+  border-radius: 0;
+  background: rgba(255, 255, 255, .025);
+  overflow: visible;
+}
+
+.momento-foto {
+  padding: 15px;
+  background: transparent;
+}
+
+.momento-foto img {
+  width: 100%;
+  height: 100%;
+  min-height: 330px;
+  object-fit: cover;
+  padding: 11px 11px 42px;
+  background: #e8eeeb;
+  border: 0;
+  border-radius: 0;
+  box-shadow: 10px 18px 34px rgba(0, 0, 0, .34);
+  transform: rotate(-1.5deg);
+  filter: saturate(.68) contrast(1.04);
+  transition: transform .35s cubic-bezier(.23, 1, .32, 1), box-shadow .35s ease;
+}
+
+.momento-destaque:hover .momento-foto img {
+  transform: rotate(0) translateY(-6px);
+  box-shadow: 14px 25px 42px rgba(0, 0, 0, .42);
+}
+
+.momento-info {
+  border-left: 1px solid rgba(99, 169, 255, .3);
+  background: rgba(7, 20, 38, .75);
+}
+
+/* Janela do álbum com TODAS as fotos colocadas no seu HTML */
+.galeria-overlay {
+  background: rgba(3, 10, 22, .9);
+  backdrop-filter: blur(14px);
+}
+
+.galeria {
+  width: min(1080px, 100%);
+  max-height: 90vh;
+  padding: clamp(24px, 4vw, 46px);
+  border: 1px solid rgba(99, 169, 255, .4);
+  border-radius: 0;
+  background: #071426;
+  box-shadow: 0 35px 110px rgba(0, 0, 0, .68);
+}
+
+.galeria-cabecalho {
+  margin-bottom: 34px;
+  text-align: left;
+}
+
+.galeria-cabecalho span {
+  color: #63a9ff;
+  font: 9px "IBM Plex Mono", monospace;
+  letter-spacing: .16em;
+}
+
+.galeria-cabecalho h2 {
+  margin: 13px 0 4px;
+  color: #dce6f2;
+  font: 400 clamp(48px, 6vw, 82px)/.85 "Cormorant Garamond", Georgia, serif;
+}
+
+.galeria-cabecalho p {
+  color: #aeb8c8;
+  font-size: 13px;
+}
+
+/* O seu .fotos-grid continua recebendo quantas fotos você quiser */
+.fotos-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.foto-item {
+  align-self: start;
+  padding: 9px 9px 34px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: #e8eeeb;
+  box-shadow: 8px 15px 26px rgba(0, 0, 0, .34);
+  transform: rotate(-1.6deg);
+  transition: transform .32s cubic-bezier(.23, 1, .32, 1), box-shadow .32s ease;
+}
+
+.foto-item:nth-child(2n) { transform: rotate(1.7deg); }
+.foto-item:nth-child(3n) { transform: rotate(-2.5deg); }
+.foto-item:nth-child(4n) { transform: rotate(2.2deg); }
+
+.foto-item:hover {
+  z-index: 2;
+  transform: translateY(-8px) rotate(0) scale(1.035);
+  box-shadow: 13px 24px 38px rgba(0, 0, 0, .5);
+}
+
+.foto-item img {
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+  border-radius: 0;
+  filter: saturate(.68) contrast(1.04);
+  transition: filter .3s ease;
+}
+
+.foto-item:hover img { filter: saturate(.82) contrast(1.05); }
+
+/* Sua ampliação continua sendo feita pelo script.js original */
+.foto-ampliada {
+  background: rgba(3, 10, 22, .94);
+  backdrop-filter: blur(14px);
+}
+
+.foto-ampliada img {
+  max-width: min(92vw, 1100px);
+  max-height: 84vh;
+  padding: 12px 12px 45px;
+  border: 0;
+  border-radius: 0;
+  background: #e8eeeb;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, .7);
+  transform: scale(.88) rotate(-1deg);
+}
+
+.foto-ampliada.aberta img { transform: scale(1) rotate(-1deg); }
+
+@media (max-width: 900px) {
+  .fotos-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  .foto-item img { height: 150px; }
+}
+
+@media (max-width: 600px) {
+  .momento-foto { padding: 10px; }
+  .momento-foto img { min-height: 240px; padding: 8px 8px 34px; }
+  .momento-info { border-left: 0; border-top: 1px solid rgba(99, 169, 255, .3); }
+  .fotos-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 13px; }
+  .foto-item { padding: 7px 7px 28px; }
+  .foto-item img { height: 130px; }
+}

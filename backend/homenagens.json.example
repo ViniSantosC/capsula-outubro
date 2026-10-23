@@ -1,0 +1,18 @@
+[
+  {
+    "id": "clara",
+    "nome": "Clara",
+    "senhaHash": "COLE_AQUI_O_HASH_GERADO_PELO_COMANDO",
+    "mensagem": "Escreva aqui a mensagem que somente a Clara verá.",
+    "legenda": "Com carinho, da 3DM",
+    "foto": ""
+  },
+  {
+    "id": "mathues-xavier",
+    "nome": "Mathues Xavier",
+    "senhaHash": "COLE_AQUI_OUTRO_HASH_GERADO_PELO_COMANDO",
+    "mensagem": "Escreva aqui uma mensagem diferente para esta carta.",
+    "legenda": "Uma lembrança que fica",
+    "foto": ""
+  }
+]
