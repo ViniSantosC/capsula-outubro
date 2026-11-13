@@ -1696,9 +1696,10 @@ box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 .search-box:focus-within::before { opacity: 1; }
 
 .search-box > span {
-  width: 25px;
   color: var(--find-gold);
-  font: 400 1.15rem/1 'Manrope', sans-serif;
+  font: 400 2rem/1 'Manrope', sans-serif;
+  padding: 0rem 1rem;
+
 }
 
 .search-box input {
@@ -1717,6 +1718,7 @@ box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
 
 .search-box small {
   padding: 7px 9px;
+  margin: 5px;
   border: 1px solid rgba(143, 199, 255, .16);
   border-radius: 7px;
   color: rgba(237,245,255, .38);
@@ -1795,7 +1797,6 @@ box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   }
 
   .navbar-capsula .navbar-toggler {
-    width: 44px;
     height: 42px;
     padding: 7px 9px;
     flex: 0 0 auto;
