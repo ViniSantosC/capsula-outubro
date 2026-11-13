@@ -373,7 +373,7 @@ body::selection { background: var(--archive-gold); color: var(--archive-ink); }
 .password-input-wrapper:focus-within { border-color: var(--archive-gold); box-shadow: 0 0 0 3px rgba(214,189,131,0.08); transform: none; }
 .password-icon { color: var(--archive-gold); }
 .password-input-wrapper input { color: var(--archive-paper); }
-.password-input-wrapper button { border-radius: 1px; background: var(--archive-gold); color: var(--archive-ink); box-shadow: none; }
+.password-input-wrapper button { border-radius: 1px; background: var(--archive-gold); color: var(--archive-ink); box-shadow: none; margin: 1rem;}
 .password-input-wrapper button:hover { filter: brightness(1.08); }
 #password-error { min-height: 1.4em; color: #e1a99a; font: 500 0.7rem/1.4 "Manrope", sans-serif; }
 .memory-cancel { margin-top: 20px; padding: 11px 22px; border: 1px solid rgba(238,232,217,0.2); border-radius: 1px; background: transparent; color: var(--archive-paper-muted); font: 500 0.62rem/1 "DM Mono", monospace; letter-spacing: 0.12em; text-transform: uppercase; }
@@ -488,7 +488,7 @@ html.has-film-reveal .film-reveal.is-visible { opacity: 1; transform: none; }
   .find h2 { font-size: clamp(3.5rem, 16vw, 5.6rem); line-height: 0.83; }
   .find-content > p { max-width: 390px; margin: 22px auto 26px; font-size: 0.75rem; line-height: 1.75; }
   .search-box { padding: 4px 5px 4px 12px; }
-  .search-box > span { width: 22px; }
+  
   .search-box input { min-height: 48px; padding: 12px 8px; font-size: 0.75rem; }
   .search-result { padding: 14px 12px; }
   .search-result-name { font-size: 0.77rem; }
@@ -507,7 +507,7 @@ html.has-film-reveal .film-reveal.is-visible { opacity: 1; transform: none; }
   .lock-person strong { font-size: 1.35rem; }
   .memory-password { width: 100%; }
   .password-input-wrapper input { min-height: 48px; font-size: 16px; }
-  .password-input-wrapper button { width: 46px; height: 46px; }
+  .password-input-wrapper button { width: 46px; height: 46px; margin :1rem;}
   .memory-cancel { min-height: 44px; margin-top: 14px; }
   .tribute-memory { width: min(520px,100%); grid-template-columns: 1fr; gap: 13px; margin: auto; padding: 42px 0 14px; }
   .tribute-close { top: 12px; right: 2px; width: 40px; height: 40px; }
