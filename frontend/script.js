@@ -53,6 +53,9 @@ const particlesContainer = document.getElementById("memory-particles");
 let pessoaSelecionada = null;
 let homenagensEmCache = null;
 let elementoComFocoAnterior = null;
+const NOMES_POR_PAGINA = 4;
+let paginaNomesAtual = 1;
+let direcaoAnimacaoPagina = null;
 
 // =====================================================
 // CRIAR PARTÍCULAS
@@ -61,9 +64,11 @@ let elementoComFocoAnterior = null;
 function criarParticulas() {
   particlesContainer.innerHTML = "";
 
-  const preferePoucoMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const preferePoucoMovimento = window.matchMedia(
+    "(prefers-reduced-motion: reduce)",
+  ).matches;
   const telaPequena = window.matchMedia("(max-width: 680px)").matches;
-  const quantidade = preferePoucoMovimento ? 0 : (telaPequena ? 28 : 56);
+  const quantidade = preferePoucoMovimento ? 0 : telaPequena ? 28 : 56;
 
   for (let i = 0; i < quantidade; i++) {
     const particle = document.createElement("span");
@@ -138,10 +143,15 @@ async function carregarNomes() {
 // =====================================================
 
 async function pesquisarHomenagens() {
-  const normalizar = (valor) => valor.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLowerCase();
+  const normalizar = (valor) =>
+    valor
+      .normalize("NFD")
+      .replace(/\p{Diacritic}/gu, "")
+      .toLowerCase();
   const termo = normalizar(searchInput.value.trim());
 
   searchResults.innerHTML = "";
+  searchResults.classList.remove("search-page-next", "search-page-previous");
 
   const pessoas = await carregarNomes();
 
@@ -160,7 +170,12 @@ async function pesquisarHomenagens() {
     return;
   }
 
-  encontrados.forEach((pessoa) => {
+  const totalPaginas = Math.ceil(encontrados.length / NOMES_POR_PAGINA);
+  paginaNomesAtual = Math.min(Math.max(paginaNomesAtual, 1), totalPaginas);
+  const inicio = (paginaNomesAtual - 1) * NOMES_POR_PAGINA;
+  const nomesVisiveis = encontrados.slice(inicio, inicio + NOMES_POR_PAGINA);
+
+  nomesVisiveis.forEach((pessoa) => {
     const resultado = document.createElement("button");
     const informacao = document.createElement("div");
     const icone = document.createElement("span");
@@ -189,6 +204,48 @@ async function pesquisarHomenagens() {
     resultado.addEventListener("click", () => iniciarPortal(pessoa));
     searchResults.appendChild(resultado);
   });
+
+  if (totalPaginas > 1) {
+    const navegacao = document.createElement("nav");
+    const anterior = document.createElement("button");
+    const indicador = document.createElement("span");
+    const proximo = document.createElement("button");
+
+    navegacao.className = "search-pagination";
+    navegacao.setAttribute("aria-label", "Navegação das homenagens");
+
+    anterior.type = "button";
+    anterior.className = "search-page-button";
+    anterior.textContent = "← Anterior";
+    anterior.disabled = paginaNomesAtual === 1;
+    anterior.addEventListener("click", () => {
+      paginaNomesAtual -= 1;
+      direcaoAnimacaoPagina = "search-page-previous";
+      pesquisarHomenagens();
+    });
+
+    indicador.className = "search-page-indicator";
+    indicador.textContent = `${paginaNomesAtual} / ${totalPaginas}`;
+    indicador.setAttribute("aria-live", "polite");
+
+    proximo.type = "button";
+    proximo.className = "search-page-button";
+    proximo.textContent = "Próximo →";
+    proximo.disabled = paginaNomesAtual === totalPaginas;
+    proximo.addEventListener("click", () => {
+      paginaNomesAtual += 1;
+      direcaoAnimacaoPagina = "search-page-next";
+      pesquisarHomenagens();
+    });
+
+    navegacao.append(anterior, indicador, proximo);
+    searchResults.appendChild(navegacao);
+  }
+
+  if (direcaoAnimacaoPagina) {
+    searchResults.classList.add(direcaoAnimacaoPagina);
+    direcaoAnimacaoPagina = null;
+  }
 }
 
 // =====================================================
@@ -319,7 +376,8 @@ function desbloquearMemoria(dados) {
 
   tributeFooter.textContent = dados.legenda || "3DM · O que fica";
 
-  tributePhrase.textContent = dados.frase || dados.legenda || "Uma lembrança esperando para ser lida.";
+  tributePhrase.textContent =
+    dados.frase || dados.legenda || "Uma lembrança esperando para ser lida.";
 
   // Sem foto: transforma a carta em uma leitura limpa, sem deixar uma coluna vazia.
   tributeMemory.classList.toggle("no-photo", !dados.fotoUrl);
@@ -471,6 +529,7 @@ document.addEventListener("keydown", (event) => {
 
 let temporizadorBusca;
 searchInput.addEventListener("input", () => {
+  paginaNomesAtual = 1;
   window.clearTimeout(temporizadorBusca);
   temporizadorBusca = window.setTimeout(pesquisarHomenagens, 130);
 });
