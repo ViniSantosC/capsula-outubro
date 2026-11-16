@@ -3774,8 +3774,26 @@
           >
             ×
           </button>
-
-          <img src="" alt="Fotografia ampliada" />
+          <button
+            class="navegar-foto navegar-foto--anterior"
+            type="button"
+            aria-label="Fotografia anterior"
+          >
+            <span aria-hidden="true">←</span>
+          </button>
+          <figure class="foto-ampliada-conteudo">
+            <span class="foto-ampliada-status" role="status" aria-live="polite"></span>
+            <img src="" alt="Fotografia ampliada" />
+            <figcaption class="foto-ampliada-legenda"></figcaption>
+          </figure>
+          <button
+            class="navegar-foto navegar-foto--proxima"
+            type="button"
+            aria-label="Próxima fotografia"
+          >
+            <span aria-hidden="true">→</span>
+          </button>
+          <div class="foto-ampliada-contador" aria-live="polite"></div>
         </div>
       </section>
 
