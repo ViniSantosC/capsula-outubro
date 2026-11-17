@@ -895,3 +895,103 @@ html.cinematic-intro-pending body > :not(.cinematic-intro) {
   .moldura-carrossel, .momento-foto, .farewell-mark { transform: none !important; transition: none; }
   .arquivo-apresentacao, .apresentacao-palco img.trocar { animation: none; }
 }
+
+/* Homenagens como envelopes guardados em um arquivo físico. */
+.search-result.envelope-card { position: relative; overflow: hidden; border-color: rgba(214,189,131,.22); background: linear-gradient(145deg, rgba(238,232,217,.08), rgba(7,21,33,.82)); }
+.search-result.envelope-card::before { position: absolute; top: 0; right: 0; width: 72px; height: 72px; background: linear-gradient(135deg, transparent 49%, rgba(214,189,131,.13) 50%); content: ""; pointer-events: none; }
+.search-result.envelope-card::after { position: absolute; right: 14px; bottom: 12px; color: rgba(214,189,131,.5); content: "✦"; font-size: .75rem; transition: transform .35s var(--archive-ease), color .25s ease; }
+.search-result.envelope-card:hover::after { color: var(--archive-gold-soft); transform: rotate(45deg) scale(1.25); }
+.search-result.envelope-card .search-result-icon { display: grid; place-items: center; width: 34px; height: 25px; border: 1px solid rgba(214,189,131,.4); border-radius: 2px; color: var(--archive-gold); font-size: .75rem; }
+.search-result.envelope-card .search-result-icon::after { position: absolute; width: 24px; height: 12px; border-bottom: 1px solid rgba(214,189,131,.42); content: ""; transform: rotate(-25deg); }
+.memory-card-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 17px; margin-top: 30px; }
+.memory-card-actions-label { flex-basis: 100%; color: var(--archive-muted); font: 500 .57rem/1 "DM Mono", monospace; letter-spacing: .14em; text-transform: uppercase; }
+.memory-card-actions button { padding: 7px 0 6px; border: 0; border-bottom: 1px solid rgba(214,189,131,.65); background: transparent; color: var(--archive-gold-soft); font: 500 .58rem/1 "DM Mono", monospace; letter-spacing: .09em; text-transform: uppercase; cursor: pointer; transition: color .25s ease, padding .25s ease; }
+.memory-card-actions button:hover, .memory-card-actions button:focus-visible { padding-inline: 5px; color: var(--archive-paper); }
+.memory-card-actions button span { margin-left: 7px; }
+.mensagem-humilde-trigger { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding: 7px 0; border: 0; border-bottom: 1px solid rgba(214,189,131,.55); background: transparent; color: var(--archive-paper-muted); font: 500 .61rem/1 "DM Mono", monospace; letter-spacing: .08em; cursor: pointer; transition: color .25s ease, border-color .25s ease; }
+.mensagem-humilde-trigger:hover, .mensagem-humilde-trigger:focus-visible { border-color: var(--archive-gold); color: var(--archive-gold-soft); }
+.mensagem-humilde-modal { position: fixed; inset: 0; z-index: 11000; display: grid; place-items: center; padding: 22px; background: rgba(3,12,19,.76); backdrop-filter: blur(12px); }
+.mensagem-humilde-modal[hidden] { display: none; }
+.mensagem-humilde-card { position: relative; width: min(490px, 100%); padding: clamp(26px, 5vw, 46px); border: 1px solid rgba(214,189,131,.38); background: #0b1c29; box-shadow: 0 30px 90px rgba(0,0,0,.48); }
+.mensagem-humilde-card h3 { margin: 13px 0 11px; color: var(--archive-paper); font: 500 clamp(2.3rem, 7vw, 3.7rem)/.9 "Cormorant Garamond", Georgia, serif; }
+.mensagem-humilde-card > p { margin: 0 0 24px; color: var(--archive-muted); font-size: .78rem; line-height: 1.6; }
+.mensagem-humilde-card label { display: grid; gap: 7px; margin-top: 15px; color: var(--archive-gold-soft); font: 500 .59rem/1 "DM Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+.mensagem-humilde-card label span { color: var(--archive-muted); font-size: .54rem; letter-spacing: .03em; text-transform: none; }
+.mensagem-humilde-card input, .mensagem-humilde-card textarea { width: 100%; padding: 12px 13px; border: 1px solid rgba(238,232,217,.17); outline: none; resize: vertical; background: rgba(238,232,217,.045); color: var(--archive-paper); font: 400 .78rem/1.5 "Manrope", sans-serif; }
+.mensagem-humilde-card input:focus, .mensagem-humilde-card textarea:focus { border-color: var(--archive-gold); }
+.mensagem-humilde-card input::placeholder, .mensagem-humilde-card textarea::placeholder { color: rgba(200,194,181,.52); }
+.mensagem-humilde-close { position: absolute; top: 14px; right: 15px; width: 34px; height: 34px; border: 1px solid rgba(238,232,217,.2); border-radius: 50%; background: transparent; color: var(--archive-paper); font-size: 1.3rem; cursor: pointer; }
+.mensagem-humilde-close:hover, .mensagem-humilde-close:focus-visible { border-color: var(--archive-gold); color: var(--archive-gold-soft); }
+.mensagem-humilde-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; }
+.mensagem-humilde-footer small { color: var(--archive-muted); font-size: .62rem; line-height: 1.4; }
+.mensagem-enviar { padding: 10px 0 8px; border: 0; border-bottom: 1px solid var(--archive-gold); background: transparent; color: var(--archive-gold-soft); font: 500 .59rem/1 "DM Mono", monospace; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.mensagem-enviar:hover, .mensagem-enviar:focus-visible { color: var(--archive-paper); }
+body.mensagem-modal-aberta { overflow: hidden; }
+.mensagem-3dm-trigger { display: inline-flex; align-items: center; gap: 8px; margin-top: 24px; padding: 8px 0 7px; border: 0; border-bottom: 1px solid rgba(214,189,131,.55); background: transparent; color: var(--archive-paper-muted); font: 500 .61rem/1 "DM Mono", monospace; letter-spacing: .08em; cursor: pointer; transition: color .25s ease, border-color .25s ease, transform .25s var(--archive-ease); }
+.mensagem-3dm-trigger:hover, .mensagem-3dm-trigger:focus-visible { border-color: var(--archive-gold); color: var(--archive-gold-soft); transform: translateY(-2px); }
+.mensagem-3dm-modal { position: fixed; inset: 0; z-index: 11000; display: grid; place-items: center; padding: 22px; background: rgba(3,12,19,.78); backdrop-filter: blur(12px); }
+.mensagem-3dm-modal[hidden] { display: none; }
+.mensagem-3dm-card { position: relative; width: min(760px, 100%); padding: clamp(26px, 5vw, 48px); border: 1px solid rgba(214,189,131,.38); background: #0b1c29; box-shadow: 0 30px 90px rgba(0,0,0,.48); }
+.mensagem-3dm-card h3 { margin: 13px 0 11px; color: var(--archive-paper); font: 500 clamp(2.3rem, 7vw, 3.7rem)/.9 "Cormorant Garamond", Georgia, serif; }
+.mensagem-3dm-card > p { max-width: 580px; margin: 0 0 24px; color: var(--archive-muted); font-size: .78rem; line-height: 1.6; }
+.mensagem-3dm-layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(220px,.8fr); gap: 24px; align-items: stretch; }
+.mensagem-3dm-fields { display: grid; gap: 14px; }
+.mensagem-3dm-card label { display: grid; gap: 7px; color: var(--archive-gold-soft); font: 500 .59rem/1 "DM Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
+.mensagem-3dm-card label span { color: var(--archive-muted); font-size: .54rem; letter-spacing: .03em; text-transform: none; }
+.mensagem-3dm-card input, .mensagem-3dm-card textarea { width: 100%; padding: 12px 13px; border: 1px solid rgba(238,232,217,.17); outline: none; resize: vertical; background: rgba(238,232,217,.045); color: var(--archive-paper); font: 400 .78rem/1.5 "Manrope", sans-serif; }
+.mensagem-3dm-card input:focus, .mensagem-3dm-card textarea:focus { border-color: var(--archive-gold); }
+.mensagem-3dm-card input::placeholder, .mensagem-3dm-card textarea::placeholder { color: rgba(200,194,181,.52); }
+.mensagem-3dm-close { position: absolute; top: 14px; right: 15px; width: 34px; height: 34px; border: 1px solid rgba(238,232,217,.2); border-radius: 50%; background: transparent; color: var(--archive-paper); font-size: 1.3rem; cursor: pointer; }
+.mensagem-3dm-close:hover, .mensagem-3dm-close:focus-visible { border-color: var(--archive-gold); color: var(--archive-gold-soft); }
+.mensagem-3dm-preview { display: flex; flex-direction: column; justify-content: center; min-height: 180px; padding: 23px; border: 1px solid rgba(214,189,131,.32); background: linear-gradient(145deg, rgba(238,232,217,.09), rgba(7,21,33,.76)); animation: previewCardIn .5s var(--archive-ease) both; }
+.mensagem-3dm-preview > span { color: var(--archive-gold); font: 500 .55rem/1 "DM Mono", monospace; letter-spacing: .18em; }
+.mensagem-3dm-preview h4 { margin: 15px 0 12px; color: var(--archive-paper); font: 500 2rem/.92 "Cormorant Garamond", Georgia, serif; }
+.mensagem-3dm-preview div { width: 32px; height: 1px; margin-bottom: 15px; background: var(--archive-gold); }
+.mensagem-3dm-preview p { min-height: 47px; margin: 0; color: var(--archive-paper-muted); font: italic 1rem/1.35 "Cormorant Garamond", Georgia, serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+.mensagem-3dm-preview small { margin-top: 18px; color: var(--archive-muted); font-size: .58rem; }
+.mensagem-3dm-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 22px; }
+.mensagem-3dm-footer small { color: var(--archive-muted); font-size: .62rem; line-height: 1.4; }
+.mensagem-enviar { padding: 10px 0 8px; border: 0; border-bottom: 1px solid var(--archive-gold); background: transparent; color: var(--archive-gold-soft); font: 500 .59rem/1 "DM Mono", monospace; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
+.mensagem-enviar:hover, .mensagem-enviar:focus-visible { color: var(--archive-paper); }
+@keyframes previewCardIn { from { opacity: .45; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* Navegação das páginas de homenagens: botões maiores, claros e com feedback delicado. */
+.search-pagination { display: flex; align-items: center; justify-content: center; gap: 13px; margin-top: 18px; }
+.search-page-button { min-width: 118px; min-height: 40px; padding: 9px 14px; border: 1px solid rgba(214,189,131,.32); background: rgba(238,232,217,.045); color: var(--archive-paper-muted); font: 500 .6rem/1 "DM Mono", monospace; letter-spacing: .08em; cursor: pointer; transition: color .25s ease, border-color .25s ease, background .25s ease, transform .3s var(--archive-ease); }
+.search-page-button:not(:disabled):hover, .search-page-button:not(:disabled):focus-visible { border-color: var(--archive-gold); background: rgba(214,189,131,.12); color: var(--archive-gold-soft); transform: translateY(-3px); }
+.search-page-button:disabled { cursor: not-allowed; opacity: .3; }
+.search-page-indicator { color: var(--archive-gold); font: 500 .62rem/1 "DM Mono", monospace; letter-spacing: .12em; }
+.search-result.envelope-card { transform: translateY(0); transition: border-color .3s ease, background .3s ease, transform .35s var(--archive-ease), box-shadow .35s ease; }
+.search-result.envelope-card:hover, .search-result.envelope-card:focus-visible { transform: translateY(-5px) rotate(-.35deg); box-shadow: 0 14px 34px rgba(0,0,0,.2); }
+.search-result.envelope-card:active { transform: translateY(-1px) scale(.99); }
+.search-result.envelope-card:hover .search-result-icon, .search-result.envelope-card:focus-visible .search-result-icon { transform: rotate(-5deg) scale(1.08); }
+.search-result.envelope-card .search-result-icon { transition: transform .35s var(--archive-ease); }
+.share-toast { position: fixed; right: 24px; bottom: 24px; z-index: 15000; max-width: min(360px, calc(100vw - 48px)); padding: 13px 17px; border: 1px solid var(--archive-gold); background: rgba(7,21,33,.95); color: var(--archive-paper); font: 500 .7rem/1.4 "DM Mono", monospace; letter-spacing: .04em; opacity: 0; transform: translateY(12px); transition: opacity .25s ease, transform .35s var(--archive-ease); }
+.share-toast.visible { opacity: 1; transform: none; }
+@media print {
+  @page { size: A4; margin: 16mm; }
+  body > *:not(#tribute-modal) { display: none !important; }
+  #tribute-modal { position: static !important; display: block !important; padding: 0 !important; background: #fff !important; color: #111 !important; opacity: 1 !important; visibility: visible !important; }
+  #tribute-modal::before, #tribute-modal::after, .tribute-modal-backdrop, .memory-particles, #tribute-lock-screen, .tribute-close { display: none !important; }
+  #tribute-memory { position: relative !important; display: grid !important; grid-template-columns: 38% 62% !important; width: 100% !important; height: auto !important; max-height: none !important; min-height: 0 !important; opacity: 1 !important; visibility: visible !important; transform: none !important; border: 1px solid #c9b98e !important; box-shadow: none !important; background: #fbfaf5 !important; }
+  #tribute-memory.no-photo { grid-template-columns: 1fr !important; }
+  #tribute-memory::after { position: absolute; right: 25px; bottom: 14px; color: #9d8751; content: "CÁPSULA 3DM  ·  O QUE FICA"; font: 500 7px/1 "DM Mono", monospace; letter-spacing: .12em; }
+  .memory-photo { min-height: 250px !important; background: #ece8dc !important; }
+  .memory-photo img { height: 100% !important; max-height: 430px !important; filter: saturate(.82) sepia(.08) contrast(1.02) !important; opacity: 1 !important; transform: none !important; }
+  .memory-content { min-height: 430px !important; padding: 42px 38px 50px !important; background: #fbfaf5 !important; border: 0 !important; color: #222 !important; }
+  .memory-content::before { color: rgba(157,135,81,.18) !important; }
+  #tribute-title, #tribute-message, #tribute-footer, .memory-label, .memory-phrase { color: #222 !important; }
+  #tribute-title { font-size: 38px !important; }
+  #tribute-message { font-size: 12px !important; line-height: 1.75 !important; }
+  #tribute-footer { color: #8c7848 !important; }
+  .memory-card-actions, #memory-preview { display: none !important; }
+  .mensagem-3dm-trigger, .mensagem-3dm-modal, .mensagem-humilde-trigger, .mensagem-humilde-modal { display: none !important; }
+  .memory-letter { display: block !important; }
+}
+@media (max-width: 620px) {
+  .mensagem-3dm-layout { grid-template-columns: 1fr; }
+  .mensagem-3dm-preview { min-height: 150px; }
+  .mensagem-3dm-footer { align-items: flex-start; flex-direction: column; }
+  .mensagem-enviar { align-self: flex-end; }
+  .search-pagination { gap: 8px; }
+  .search-page-button { min-width: 0; padding-inline: 10px; }
+}

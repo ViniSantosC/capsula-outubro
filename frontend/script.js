@@ -57,6 +57,25 @@ const NOMES_POR_PAGINA = 4;
 let paginaNomesAtual = 1;
 let direcaoAnimacaoPagina = null;
 
+function adicionarAcoesDoCartao() {
+  const carta = document.getElementById("memory-letter");
+  if (!carta || carta.querySelector(".memory-card-actions")) return;
+  const acoes = document.createElement("div");
+  acoes.className = "memory-card-actions";
+  acoes.innerHTML = `
+    <span class="memory-card-actions-label">guardar esta lembrança</span>
+    <button id="print-memory" type="button">salvar cartão em PDF <span aria-hidden="true">↗</span></button>`;
+  carta.appendChild(acoes);
+  acoes.querySelector("#print-memory").addEventListener("click", () => {
+    document.body.classList.add("printing-memory");
+    window.print();
+    window.setTimeout(
+      () => document.body.classList.remove("printing-memory"),
+      800,
+    );
+  });
+}
+
 // =====================================================
 // CRIAR PARTÍCULAS
 // =====================================================
@@ -185,7 +204,9 @@ async function pesquisarHomenagens() {
     const seta = document.createElement("span");
 
     resultado.type = "button";
-    resultado.className = "search-result";
+    resultado.className = "search-result envelope-card";
+    resultado.dataset.name = String(pessoa.nome ?? "");
+    resultado.setAttribute("aria-label", `Abrir envelope de ${pessoa.nome}`);
     informacao.className = "search-result-info";
     icone.className = "search-result-icon";
     icone.setAttribute("aria-hidden", "true");
@@ -378,6 +399,7 @@ function desbloquearMemoria(dados) {
 
   tributePhrase.textContent =
     dados.frase || dados.legenda || "Uma lembrança esperando para ser lida.";
+  adicionarAcoesDoCartao();
 
   // Sem foto: transforma a carta em uma leitura limpa, sem deixar uma coluna vazia.
   tributeMemory.classList.toggle("no-photo", !dados.fotoUrl);
