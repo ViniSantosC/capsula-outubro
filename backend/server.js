@@ -1,5 +1,6 @@
 const crypto = require("node:crypto");
 const express = require("express");
+const { Pool } = require("pg");
 const fs = require("node:fs");
 const path = require("node:path");
 
@@ -14,6 +15,14 @@ const ARQUIVO_HOMENAGENS = fs.existsSync("/etc/secrets/homenagens.json")
 const ARQUIVO_CARTAS =
   process.env.CARTAS_3DM_FILE || path.join(__dirname, "cartas-3dm.json");
 const ADMIN_CARTAS_TOKEN = process.env.ADMIN_CARTAS_TOKEN || "";
+const pool = process.env.DATABASE_URL
+  ? new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+      max: 5,
+      idleTimeoutMillis: 30000,
+    })
+  : null;
 
 const RATE_WINDOW_MS = 15 * 60 * 1000;
 const MAX_PASSWORD_ATTEMPTS = 8;
@@ -55,6 +64,89 @@ function salvarCartas(cartas) {
     mode: 0o600,
   });
   fs.renameSync(temporario, ARQUIVO_CARTAS);
+}
+
+function cartaDoBanco(row) {
+  return {
+    id: row.id,
+    nome: row.nome,
+    categoria: row.categoria,
+    mensagem: row.mensagem,
+    criadaEm:
+      row.criada_em instanceof Date
+        ? row.criada_em.toISOString()
+        : row.criada_em,
+    publicada: row.publicada,
+    revisadaEm:
+      row.revisada_em instanceof Date
+        ? row.revisada_em.toISOString()
+        : row.revisada_em,
+  };
+}
+
+async function prepararBanco() {
+  if (!pool) return;
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS cartas_3dm (
+      id TEXT PRIMARY KEY,
+      nome VARCHAR(80) NOT NULL,
+      categoria VARCHAR(30) NOT NULL,
+      mensagem VARCHAR(1200) NOT NULL,
+      criada_em TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      publicada BOOLEAN NOT NULL DEFAULT FALSE,
+      revisada_em TIMESTAMPTZ
+    )
+  `);
+
+  const { rows } = await pool.query(
+    "SELECT COUNT(*)::int AS total FROM cartas_3dm",
+  );
+  if (rows[0].total !== 0) return;
+  for (const carta of carregarCartas()) {
+    await pool.query(
+      `INSERT INTO cartas_3dm (id, nome, categoria, mensagem, criada_em, publicada, revisada_em)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) ON CONFLICT (id) DO NOTHING`,
+      [
+        carta.id,
+        carta.nome,
+        carta.categoria,
+        carta.mensagem,
+        carta.criadaEm,
+        carta.publicada === true,
+        carta.revisadaEm || null,
+      ],
+    );
+  }
+}
+
+async function listarCartas() {
+  if (!pool) return carregarCartas();
+  const { rows } = await pool.query(
+    "SELECT id, nome, categoria, mensagem, criada_em, publicada, revisada_em FROM cartas_3dm ORDER BY criada_em DESC LIMIT 500",
+  );
+  return rows.map(cartaDoBanco);
+}
+
+async function inserirCarta(carta) {
+  if (!pool) {
+    const cartas = carregarCartas();
+    cartas.push(carta);
+    salvarCartas(cartas.slice(-500));
+    return;
+  }
+  await pool.query(
+    `INSERT INTO cartas_3dm (id, nome, categoria, mensagem, criada_em, publicada, revisada_em)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+    [
+      carta.id,
+      carta.nome,
+      carta.categoria,
+      carta.mensagem,
+      carta.criadaEm,
+      carta.publicada,
+      carta.revisadaEm,
+    ],
+  );
 }
 
 function podeEnviarCarta(req) {
@@ -235,22 +327,28 @@ app.get("/api/homenagens", (_req, res) => {
 });
 
 // Cartas públicas do 3DM: somente os campos consentidos são publicados.
-app.get("/api/cartas-3dm", (_req, res) => {
-  const cartas = carregarCartas()
-    .filter((carta) => carta.publicada === true)
-    .sort((a, b) => String(b.criadaEm).localeCompare(String(a.criadaEm)))
-    .slice(0, 100)
-    .map(({ id, nome, categoria, mensagem, criadaEm }) => ({
-      id,
-      nome,
-      categoria,
-      mensagem,
-      criadaEm,
-    }));
-  res.json(cartas);
+app.get("/api/cartas-3dm", async (_req, res) => {
+  try {
+    const cartas = (await listarCartas())
+      .filter((carta) => carta.publicada === true)
+      .slice(0, 100)
+      .map(({ id, nome, categoria, mensagem, criadaEm }) => ({
+        id,
+        nome,
+        categoria,
+        mensagem,
+        criadaEm,
+      }));
+    return res.json(cartas);
+  } catch (erro) {
+    console.error("Não foi possível listar cartas públicas", erro);
+    return res
+      .status(500)
+      .json({ erro: "Não foi possível carregar as cartas agora." });
+  }
 });
 
-app.post("/api/cartas-3dm", (req, res) => {
+app.post("/api/cartas-3dm", async (req, res) => {
   if (!podeEnviarCarta(req)) {
     res.setHeader("Retry-After", "900");
     return res
@@ -298,9 +396,7 @@ app.post("/api/cartas-3dm", (req, res) => {
     revisadaEm: null,
   };
   try {
-    const cartas = carregarCartas();
-    cartas.push(carta);
-    salvarCartas(cartas.slice(-500));
+    await inserirCarta(carta);
     return res
       .status(201)
       .json({
@@ -320,31 +416,70 @@ app.post("/api/cartas-3dm", (req, res) => {
 });
 
 // Painel privado: só funciona quando ADMIN_CARTAS_TOKEN está configurado no servidor.
-app.get("/api/admin/cartas-3dm", exigirAdmin, (_req, res) => {
-  const cartas = carregarCartas()
-    .sort((a, b) => String(b.criadaEm).localeCompare(String(a.criadaEm)))
-    .slice(0, 500);
-  res.json(cartas);
+app.get("/api/admin/cartas-3dm", exigirAdmin, async (_req, res) => {
+  try {
+    return res.json(await listarCartas());
+  } catch (erro) {
+    console.error("Não foi possível listar cartas administrativas", erro);
+    return res
+      .status(500)
+      .json({ erro: "Não foi possível carregar o painel agora." });
+  }
 });
 
-app.patch("/api/admin/cartas-3dm/:id", exigirAdmin, (req, res) => {
-  const cartas = carregarCartas();
-  const carta = cartas.find((item) => item.id === req.params.id);
-  if (!carta) return res.status(404).json({ erro: "Carta não encontrada." });
-  if (typeof req.body?.publicada === "boolean")
-    carta.publicada = req.body.publicada;
-  carta.revisadaEm = new Date().toISOString();
-  salvarCartas(cartas);
-  return res.json(carta);
+app.patch("/api/admin/cartas-3dm/:id", exigirAdmin, async (req, res) => {
+  try {
+    const publicada =
+      typeof req.body?.publicada === "boolean" ? req.body.publicada : null;
+    if (publicada === null)
+      return res.status(400).json({ erro: "Informe o estado da publicação." });
+    if (pool) {
+      const resultado = await pool.query(
+        "UPDATE cartas_3dm SET publicada = $1, revisada_em = NOW() WHERE id = $2 RETURNING id, nome, categoria, mensagem, criada_em, publicada, revisada_em",
+        [publicada, req.params.id],
+      );
+      if (!resultado.rowCount)
+        return res.status(404).json({ erro: "Carta não encontrada." });
+      return res.json(cartaDoBanco(resultado.rows[0]));
+    }
+    const cartas = carregarCartas();
+    const carta = cartas.find((item) => item.id === req.params.id);
+    if (!carta) return res.status(404).json({ erro: "Carta não encontrada." });
+    carta.publicada = publicada;
+    carta.revisadaEm = new Date().toISOString();
+    salvarCartas(cartas);
+    return res.json(carta);
+  } catch (erro) {
+    console.error("Não foi possível revisar carta", erro);
+    return res
+      .status(500)
+      .json({ erro: "Não foi possível atualizar a carta agora." });
+  }
 });
 
-app.delete("/api/admin/cartas-3dm/:id", exigirAdmin, (req, res) => {
-  const cartas = carregarCartas();
-  const restantes = cartas.filter((item) => item.id !== req.params.id);
-  if (restantes.length === cartas.length)
-    return res.status(404).json({ erro: "Carta não encontrada." });
-  salvarCartas(restantes);
-  return res.status(204).end();
+app.delete("/api/admin/cartas-3dm/:id", exigirAdmin, async (req, res) => {
+  try {
+    if (pool) {
+      const resultado = await pool.query(
+        "DELETE FROM cartas_3dm WHERE id = $1",
+        [req.params.id],
+      );
+      if (!resultado.rowCount)
+        return res.status(404).json({ erro: "Carta não encontrada." });
+      return res.status(204).end();
+    }
+    const cartas = carregarCartas();
+    const restantes = cartas.filter((item) => item.id !== req.params.id);
+    if (restantes.length === cartas.length)
+      return res.status(404).json({ erro: "Carta não encontrada." });
+    salvarCartas(restantes);
+    return res.status(204).end();
+  } catch (erro) {
+    console.error("Não foi possível apagar carta", erro);
+    return res
+      .status(500)
+      .json({ erro: "Não foi possível apagar a carta agora." });
+  }
 });
 
 // A URL da foto só é emitida depois da senha correta e expira em 15 minutos.
@@ -408,6 +543,16 @@ app.use("/img/homenagens", (_req, res) =>
 // Só a pasta pública restante do site é estática. Dados e fotos pessoais ficam protegidos.
 app.use(express.static(FRONTEND_DIR, { etag: true, index: "index.html" }));
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`3DM — O que fica disponível na porta ${PORT}`);
+async function iniciar() {
+  await prepararBanco();
+  app.listen(PORT, "0.0.0.0", () => {
+    console.log(
+      `3DM — O que fica disponível na porta ${PORT}${pool ? " (Neon PostgreSQL)" : " (arquivo local)"}`,
+    );
+  });
+}
+
+iniciar().catch((erro) => {
+  console.error("Não foi possível iniciar o servidor", erro);
+  process.exit(1);
 });
