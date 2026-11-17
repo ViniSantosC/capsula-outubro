@@ -939,6 +939,7 @@ body.mensagem-modal-aberta { overflow: hidden; }
 .mensagem-3dm-card label { display: grid; gap: 7px; color: var(--archive-gold-soft); font: 500 .59rem/1 "DM Mono", monospace; letter-spacing: .1em; text-transform: uppercase; }
 .mensagem-3dm-card label span { color: var(--archive-muted); font-size: .54rem; letter-spacing: .03em; text-transform: none; }
 .mensagem-3dm-card input, .mensagem-3dm-card textarea { width: 100%; padding: 12px 13px; border: 1px solid rgba(238,232,217,.17); outline: none; resize: vertical; background: rgba(238,232,217,.045); color: var(--archive-paper); font: 400 .78rem/1.5 "Manrope", sans-serif; }
+.mensagem-3dm-card select { width: 100%; padding: 12px 13px; border: 1px solid rgba(238,232,217,.17); outline: none; background: #102b3b; color: var(--archive-paper); font: 400 .78rem/1.5 "Manrope", sans-serif; }
 .mensagem-3dm-card input:focus, .mensagem-3dm-card textarea:focus { border-color: var(--archive-gold); }
 .mensagem-3dm-card input::placeholder, .mensagem-3dm-card textarea::placeholder { color: rgba(200,194,181,.52); }
 .mensagem-3dm-close { position: absolute; top: 14px; right: 15px; width: 34px; height: 34px; border: 1px solid rgba(238,232,217,.2); border-radius: 50%; background: transparent; color: var(--archive-paper); font-size: 1.3rem; cursor: pointer; }
@@ -953,6 +954,26 @@ body.mensagem-modal-aberta { overflow: hidden; }
 .mensagem-3dm-footer small { color: var(--archive-muted); font-size: .62rem; line-height: 1.4; }
 .mensagem-enviar { padding: 10px 0 8px; border: 0; border-bottom: 1px solid var(--archive-gold); background: transparent; color: var(--archive-gold-soft); font: 500 .59rem/1 "DM Mono", monospace; letter-spacing: .08em; text-transform: uppercase; cursor: pointer; }
 .mensagem-enviar:hover, .mensagem-enviar:focus-visible { color: var(--archive-paper); }
+.mensagem-enviar:disabled { cursor: wait; opacity: .45; }
+.mensagem-consentimento { display: flex !important; grid-template-columns: auto 1fr; align-items: flex-start; gap: 9px; margin-top: 20px !important; color: var(--archive-muted) !important; font: 400 .63rem/1.45 "Manrope", sans-serif !important; letter-spacing: 0 !important; text-transform: none !important; }
+.mensagem-consentimento-check { width: 16px !important; height: 16px; flex: 0 0 auto; margin-top: 1px; accent-color: var(--archive-gold); }
+.cartas-3dm-area { margin: 26px 0 18px; }
+.cartas-3dm-toggle { display: inline-flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid rgba(214,189,131,.34); background: rgba(238,232,217,.045); color: var(--archive-paper-muted); font: 500 .63rem/1 "DM Mono", monospace; letter-spacing: .08em; cursor: pointer; transition: color .25s ease, border-color .25s ease, background .25s ease, transform .3s var(--archive-ease); }
+.cartas-3dm-toggle span { color: var(--archive-gold); }
+.cartas-3dm-toggle small { color: var(--archive-muted); font-size: .53rem; letter-spacing: .02em; }
+.cartas-3dm-toggle:hover, .cartas-3dm-toggle:focus-visible, .cartas-3dm-toggle[aria-expanded="true"] { border-color: var(--archive-gold); background: rgba(214,189,131,.1); color: var(--archive-paper); transform: translateY(-2px); }
+.cartas-3dm-wall { margin-top: 15px; padding: 17px; border: 1px solid rgba(214,189,131,.2); background: rgba(7,21,33,.38); }
+.cartas-3dm-wall[hidden] { display: none; }
+.cartas-3dm-wall-head { display: flex; align-items: baseline; justify-content: space-between; gap: 16px; margin-bottom: 15px; color: var(--archive-gold-soft); font: 500 .62rem/1 "DM Mono", monospace; letter-spacing: .12em; text-transform: uppercase; }
+.cartas-3dm-wall-head small { color: var(--archive-muted); font-size: .53rem; letter-spacing: .02em; text-transform: none; }
+.cartas-3dm-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px; }
+.carta-3dm-card { position: relative; min-height: 155px; padding: 19px; border: 1px solid rgba(214,189,131,.24); background: linear-gradient(145deg, rgba(238,232,217,.08), rgba(7,21,33,.8)); animation: letterIn .55s var(--archive-ease) both; }
+.carta-3dm-card::after { position: absolute; top: 12px; right: 13px; color: rgba(214,189,131,.45); content: "✦"; font-size: .68rem; }
+.carta-3dm-tipo { color: var(--archive-gold); font: 500 .53rem/1 "DM Mono", monospace; letter-spacing: .13em; text-transform: uppercase; }
+.carta-3dm-card h3 { margin: 12px 0 9px; color: var(--archive-paper); font: 500 1.8rem/.9 "Cormorant Garamond", Georgia, serif; }
+.carta-3dm-card p { margin: 0; color: var(--archive-paper-muted); font: italic .95rem/1.35 "Cormorant Garamond", Georgia, serif; white-space: pre-wrap; overflow-wrap: anywhere; }
+.carta-3dm-card small { display: block; margin-top: 17px; color: var(--archive-muted); font: 500 .52rem/1 "DM Mono", monospace; }
+.cartas-3dm-empty { margin: 5px 0; color: var(--archive-muted); font-size: .72rem; }
 @keyframes previewCardIn { from { opacity: .45; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 /* Navegação das páginas de homenagens: botões maiores, claros e com feedback delicado. */
 .search-pagination { display: flex; align-items: center; justify-content: center; gap: 13px; margin-top: 18px; }
@@ -992,6 +1013,8 @@ body.mensagem-modal-aberta { overflow: hidden; }
   .mensagem-3dm-preview { min-height: 150px; }
   .mensagem-3dm-footer { align-items: flex-start; flex-direction: column; }
   .mensagem-enviar { align-self: flex-end; }
+  .cartas-3dm-grid { grid-template-columns: 1fr; }
+  .cartas-3dm-wall-head { align-items: flex-start; flex-direction: column; gap: 7px; }
   .search-pagination { gap: 8px; }
   .search-page-button { min-width: 0; padding-inline: 10px; }
 }

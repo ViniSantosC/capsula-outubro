@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex,nofollow" />
+    <title>Painel privado — Cartas 3DM</title>
+    <style>
+      :root { color-scheme: dark; --ink:#071521; --panel:#0d2433; --paper:#eee8d9; --muted:#aeb9bc; --gold:#d6bd83; --line:rgba(225,212,178,.2); }
+      * { box-sizing:border-box; }
+      body { min-height:100vh; margin:0; padding:32px 18px; background:radial-gradient(circle at 20% 0%,#173648 0,transparent 38rem),var(--ink); color:var(--paper); font-family:Arial,sans-serif; }
+      main { width:min(980px,100%); margin:auto; }
+      header { display:flex; align-items:end; justify-content:space-between; gap:20px; margin-bottom:28px; }
+      h1 { margin:0; font:500 clamp(2.5rem,7vw,5rem)/.85 Georgia,serif; }
+      .eyebrow { color:var(--gold); font:600 .65rem/1 monospace; letter-spacing:.16em; text-transform:uppercase; }
+      .panel { padding:20px; border:1px solid var(--line); background:rgba(13,36,51,.8); }
+      .login { display:flex; gap:10px; margin-bottom:24px; }
+      input { flex:1; min-width:0; padding:13px; border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--paper); }
+      button { padding:12px 15px; border:1px solid var(--gold); background:transparent; color:var(--gold); cursor:pointer; }
+      button:hover,button:focus-visible { background:rgba(214,189,131,.14); color:var(--paper); }
+      #status { min-height:20px; margin:12px 0; color:var(--muted); font-size:.85rem; }
+      .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px; }
+      article { padding:18px; border:1px solid var(--line); background:rgba(7,21,33,.62); }
+      article.pending { border-color:rgba(214,189,131,.75); }
+      article h2 { margin:10px 0 8px; font:500 2rem/.9 Georgia,serif; }
+      article p { min-height:60px; margin:0; color:var(--muted); line-height:1.55; white-space:pre-wrap; overflow-wrap:anywhere; }
+      article small { display:block; margin-bottom:14px; color:var(--gold); font:600 .62rem/1 monospace; letter-spacing:.08em; text-transform:uppercase; }
+      .actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:16px; }
+      .danger { border-color:#c98282; color:#e7a8a8; }
+      .empty { color:var(--muted); }
+      @media (max-width:600px) { header { display:block; } .login { flex-direction:column; } }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header><div><span class="eyebrow">arquivo privado · 3DM</span><h1>Cartas</h1></div><button id="refresh" type="button">atualizar</button></header>
+      <section class="panel">
+        <div class="login"><input id="token" type="password" autocomplete="current-password" placeholder="Token administrativo" /><button id="enter" type="button">entrar</button></div>
+        <p id="status" role="status">Use o token configurado no servidor.</p>
+        <div id="cards" class="cards"></div>
+      </section>
+    </main>
+    <script>
+      const tokenField = document.getElementById("token");
+      const status = document.getElementById("status");
+      const cards = document.getElementById("cards");
+      let cartas = [];
+      const headers = () => ({ "x-admin-token": tokenField.value.trim() });
+      const escDate = (value) => value ? new Date(value).toLocaleString("pt-BR") : "";
+      function render() {
+        cards.innerHTML = "";
+        if (!cartas.length) { cards.innerHTML = '<p class="empty">Nenhuma carta encontrada.</p>'; return; }
+        cartas.forEach((carta) => {
+          const card = document.createElement("article");
+          card.className = carta.publicada ? "" : "pending";
+          card.innerHTML = '<small></small><h2></h2><p></p><small class="date"></small><div class="actions"></div>';
+          card.querySelector("small").textContent = carta.publicada ? `${carta.categoria} · publicada` : `${carta.categoria} · aguardando revisão`;
+          card.querySelector("h2").textContent = carta.nome;
+          card.querySelector("p").textContent = carta.mensagem;
+          card.querySelector(".date").textContent = escDate(carta.criadaEm);
+          const actions = card.querySelector(".actions");
+          const toggle = document.createElement("button"); toggle.textContent = carta.publicada ? "ocultar" : "aprovar";
+          toggle.onclick = () => atualizar(carta.id, !carta.publicada);
+          const remove = document.createElement("button"); remove.className = "danger"; remove.textContent = "apagar";
+          remove.onclick = () => { if (window.confirm("Apagar esta carta definitivamente?")) apagar(carta.id); };
+          actions.append(toggle, remove); cards.append(card);
+        });
+      }
+      async function carregar() {
+        status.textContent = "Carregando…";
+        const response = await fetch("/api/admin/cartas-3dm", { headers: headers(), cache: "no-store" });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.erro || "Não autorizado.");
+        cartas = data; render(); status.textContent = `${cartas.length} carta(s) no arquivo.`;
+      }
+      async function atualizar(id, publicada) {
+        const response = await fetch(`/api/admin/cartas-3dm/${encodeURIComponent(id)}`, { method:"PATCH", headers:{ ...headers(), "Content-Type":"application/json" }, body:JSON.stringify({ publicada }) });
+        if (!response.ok) { status.textContent = "Não foi possível atualizar."; return; } await carregar();
+      }
+      async function apagar(id) {
+        const response = await fetch(`/api/admin/cartas-3dm/${encodeURIComponent(id)}`, { method:"DELETE", headers:headers() });
+        if (!response.ok) { status.textContent = "Não foi possível apagar."; return; } await carregar();
+      }
+      document.getElementById("enter").onclick = () => carregar().catch((error) => { status.textContent = error.message; cards.innerHTML = ""; });
+      document.getElementById("refresh").onclick = () => carregar().catch((error) => { status.textContent = error.message; });
+      tokenField.addEventListener("keydown", (event) => { if (event.key === "Enter") document.getElementById("enter").click(); });
+    </script>
+  </body>
+</html>
