@@ -338,10 +338,70 @@
     overlay.querySelector(".apresentacao-fechar").focus();
   }
 
-  // Espaço de escrita para o 3DM: prévia ao vivo, sem mural público nem armazenamento.
+  // Espaço de escrita para o 3DM: cartas públicas com consentimento explícito.
   const findContent = document.querySelector("#homenagens .find-content");
-  const whatsappLink = document.querySelector('.privacy a[href*="wa.me/"]');
-  if (findContent && whatsappLink) {
+  if (findContent) {
+    const lettersArea = document.createElement("section");
+    lettersArea.className = "cartas-3dm-area";
+    lettersArea.setAttribute("aria-labelledby", "cartas-3dm-title");
+    lettersArea.innerHTML = `
+      <button type="button" class="cartas-3dm-toggle" aria-expanded="false"><span>✦</span> Cartas para o 3DM <small>ver a sala de mensagens</small></button>
+      <div class="cartas-3dm-wall" hidden><div class="cartas-3dm-wall-head"><span id="cartas-3dm-title">O que ficou escrito</span><small>mensagens compartilhadas pela turma</small></div><div class="cartas-3dm-grid" aria-live="polite"></div></div>`;
+    findContent.insertBefore(
+      lettersArea,
+      findContent.querySelector(".privacy"),
+    );
+    const lettersToggle = lettersArea.querySelector(".cartas-3dm-toggle");
+    const lettersWall = lettersArea.querySelector(".cartas-3dm-wall");
+    const lettersGrid = lettersArea.querySelector(".cartas-3dm-grid");
+    let lettersLoaded = false;
+    const renderLetters = (letters) => {
+      lettersGrid.innerHTML = "";
+      if (!letters.length) {
+        lettersGrid.innerHTML =
+          '<p class="cartas-3dm-empty">Ainda não há cartas. Talvez a primeira possa ser sua.</p>';
+        return;
+      }
+      letters.forEach((letter) => {
+        const card = document.createElement("article");
+        card.className = "carta-3dm-card";
+        const date = letter.criadaEm
+          ? new Date(letter.criadaEm).toLocaleDateString("pt-BR", {
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+            })
+          : "";
+        card.innerHTML = `<span class="carta-3dm-tipo"></span><h3></h3><p></p><small></small>`;
+        card.querySelector(".carta-3dm-tipo").textContent =
+          letter.categoria || "Alguém da turma";
+        card.querySelector("h3").textContent =
+          letter.nome || "Alguém da nossa história";
+        card.querySelector("p").textContent = letter.mensagem || "";
+        card.querySelector("small").textContent = date;
+        lettersGrid.appendChild(card);
+      });
+    };
+    const loadLetters = async () => {
+      if (lettersLoaded) return;
+      lettersGrid.innerHTML =
+        '<p class="cartas-3dm-empty">Abrindo as cartas…</p>';
+      try {
+        const response = await fetch("/api/cartas-3dm", { cache: "no-store" });
+        if (!response.ok) throw new Error("Falha ao carregar cartas");
+        renderLetters(await response.json());
+        lettersLoaded = true;
+      } catch {
+        lettersGrid.innerHTML =
+          '<p class="cartas-3dm-empty">As cartas estarão disponíveis quando o arquivo for aberto.</p>';
+      }
+    };
+    lettersToggle.addEventListener("click", () => {
+      const open = lettersWall.hidden;
+      lettersWall.hidden = !open;
+      lettersToggle.setAttribute("aria-expanded", String(open));
+      if (open) loadLetters();
+    });
     const messageTrigger = document.createElement("button");
     messageTrigger.type = "button";
     messageTrigger.className = "mensagem-3dm-trigger";
@@ -363,15 +423,17 @@
         <button type="button" class="mensagem-3dm-close" aria-label="Fechar escrita">×</button>
         <span class="memory-label">UMA CARTA PARA A TURMA</span>
         <h3>Escrever para o 3DM</h3>
-        <p>Escreva do seu jeito. O texto aparece aqui enquanto você escreve e só sai do site se você decidir enviar.</p>
+        <p>Escreva do seu jeito. O texto aparece aqui enquanto você escreve e só será visto pela turma se você autorizar.</p>
         <div class="mensagem-3dm-layout">
           <div class="mensagem-3dm-fields">
             <label>Seu nome <span>(opcional)</span><input class="mensagem-nome" type="text" maxlength="60" autocomplete="name" placeholder="Como posso te chamar?"></label>
+            <label>Você é <select class="mensagem-categoria"><option>Aluno</option><option>Professor</option><option>Amigo</option><option>Família</option><option>Outro</option></select></label>
             <label>Sua mensagem<textarea class="mensagem-texto" maxlength="500" rows="5" required placeholder="Escreva algumas palavras…"></textarea></label>
           </div>
           <article class="mensagem-3dm-preview" aria-live="polite"><span>PARA O 3DM</span><h4 class="mensagem-preview-nome">Uma mensagem guardada</h4><div></div><p class="mensagem-preview-texto">Sua mensagem aparecerá aqui.</p><small>com carinho, alguém que fez parte</small></article>
         </div>
-        <div class="mensagem-3dm-footer"><small>Não será publicada no site.</small><button type="button" class="mensagem-enviar">abrir WhatsApp <span aria-hidden="true">↗</span></button></div>
+        <label class="mensagem-consentimento"><input class="mensagem-consentimento-check" type="checkbox"><span>Autorizo que esta carta apareça na aba “Cartas para o 3DM” para a turma ler.</span></label>
+        <div class="mensagem-3dm-footer"><small class="mensagem-status">A publicação é opcional e passa por revisão.</small><button type="button" class="mensagem-enviar">enviar carta <span aria-hidden="true">↗</span></button></div>
       </div>`;
     document.body.appendChild(messageModal);
     const nomeField = messageModal.querySelector(".mensagem-nome");
@@ -404,18 +466,50 @@
     });
     messageModal
       .querySelector(".mensagem-enviar")
-      .addEventListener("click", () => {
+      .addEventListener("click", async () => {
         const nome = messageModal.querySelector(".mensagem-nome").value.trim();
         const texto = messageModal
           .querySelector(".mensagem-texto")
           .value.trim();
         if (!texto)
           return messageModal.querySelector(".mensagem-texto").focus();
-        const destino = new URL(whatsappLink.href);
-        const saudacao = nome ? `Olá, sou ${nome}.` : "Olá!";
-        destino.searchParams.set("text", `${saudacao}\n\n${texto}`);
-        window.open(destino.toString(), "_blank", "noopener,noreferrer");
-        closeMessage();
+        const categoria = messageModal.querySelector(
+          ".mensagem-categoria",
+        ).value;
+        const consentimentoPublico = messageModal.querySelector(
+          ".mensagem-consentimento-check",
+        ).checked;
+        const status = messageModal.querySelector(".mensagem-status");
+        if (!consentimentoPublico) {
+          status.textContent = "Confirme que a turma pode ler esta carta.";
+          return;
+        }
+        const button = messageModal.querySelector(".mensagem-enviar");
+        button.disabled = true;
+        status.textContent = "Guardando sua carta…";
+        try {
+          const response = await fetch("/api/cartas-3dm", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nome,
+              categoria,
+              mensagem: texto,
+              consentimentoPublico,
+            }),
+          });
+          const saved = await response.json();
+          if (!response.ok)
+            throw new Error(saved.erro || "Não foi possível guardar a carta.");
+          status.textContent =
+            "Carta enviada para revisão. Obrigado por escrever para o 3DM.";
+          window.setTimeout(closeMessage, 1500);
+        } catch (error) {
+          status.textContent =
+            error.message || "Não foi possível guardar agora.";
+        } finally {
+          button.disabled = false;
+        }
       });
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !messageModal.hidden) closeMessage();
@@ -424,10 +518,10 @@
 
   // Atalhos de teclado simples e foco cíclico no portal existente.
   document.addEventListener("keydown", (event) => {
+    const key = typeof event.key === "string" ? event.key : "";
     if (
-      (event.key === "/" ||
-        (event.key.toLowerCase() === "k" &&
-          (event.metaKey || event.ctrlKey))) &&
+      (key === "/" ||
+        (key.toLowerCase() === "k" && (event.metaKey || event.ctrlKey))) &&
       document.activeElement?.tagName !== "INPUT"
     ) {
       event.preventDefault();
